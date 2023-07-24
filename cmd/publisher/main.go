@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/alainrk/franz/models"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
@@ -78,6 +79,11 @@ func publishMessage(p *kafka.Producer, topic string, key, value []byte, headers 
 }
 
 func getRandomMessage() []byte {
-	message := fmt.Sprintf("Random Message - %d", rand.Intn(1000))
-	return []byte(message)
+	u := models.NewUser{
+		Firstname:   "John",
+		Lastname:    "Doe",
+		DateOfBirth: "1990-01-01",
+		HeightCm:    170 + rand.Uint32()%30,
+	}
+	return []byte(u.String())
 }
