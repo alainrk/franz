@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package user;
+option go_package="userpb";
+
+message NewUser {
+  string firstname = 1;
+  string lastname = 2;
+  string date_of_birth = 3;
+  uint32 height_cm = 4;
+}

@@ -22,6 +22,7 @@ Before running the Franz, ensure you have Docker and Docker Compose installed on
 - `make run`: Executes the Franz (consumer) using the main entry point.
 - `make publish-random`: Provides instructions for publishing random messages to a topic.
 - `make cleanup-topics`: Displays a warning and instructions to clean up topics.
+- `make proto-generate`: Generates the Go code from the proto files.
 
 ## Usage
 
