@@ -20,3 +20,4 @@ go.work
 
 # Project specific
 build
+kafka-data
