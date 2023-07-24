@@ -16,4 +16,4 @@ run:
 	go run cmd/franz/main.go
 
 publish-random:
-	go run cmd/publisher/main.go topic1 10
+	@echo "Run:\n\tgo run cmd/publisher/main.go [topic_name] [number_of_messages]\n"
