@@ -2,6 +2,10 @@
 
 **Work in progress**
 
+<div align="center">
+  <img src="./assets/franz.png" width="200" height="auto"/>
+</div>
+
 ## Overview
 
 Franz is a Work In Progress command-line tool designed to facilitate the analysis of Kafka topics, perform scraping operations, and execute various tasks related to Kafka message processing. At the moment it includes simple functionalities such as starting a Kafka consumer, publishing random messages to topics, and cleaning up topics as needed.
