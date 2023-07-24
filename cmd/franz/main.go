@@ -9,7 +9,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-var broker = "your-aws-msk-broker:9092"
+var broker = "localhost:29092"
 var topics = []string{"topic1", "topic2"}
 
 func main() {
