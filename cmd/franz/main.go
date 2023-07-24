@@ -52,11 +52,7 @@ func main() {
 		return
 	}
 
-	fmt.Println(topics)
-
-	if len(topics) >= 0 {
-		return
-	}
+	fmt.Printf("Auto-discovered topics: %v\n", topics)
 
 	err = c.SubscribeTopics(topics, nil)
 	if err != nil {
@@ -81,11 +77,17 @@ func main() {
 			switch e := ev.(type) {
 			case *kafka.Message:
 				fmt.Println("Received a new message:")
-				fmt.Printf("Topic: %s\n", *e.TopicPartition.Topic)
-				fmt.Printf("Partition: %d\n", e.TopicPartition.Partition)
 				fmt.Printf("Headers: %v\n", e.Headers)
 				fmt.Printf("Content: %s\n", e.Value)
-				// fmt.Printf("Deserializer: %s\n", e.TopicPartition.TODO)
+				fmt.Printf("Key: %s\n", e.Key)
+				fmt.Printf("Opaque: %v\n", e.Opaque)
+				fmt.Printf("TopicPartition.Topic: %s\n", *e.TopicPartition.Topic)
+				fmt.Printf("TopicPartition.Partition: %d\n", e.TopicPartition.Partition)
+				fmt.Printf("TopicPartition.Offset: %v\n", e.TopicPartition.Offset)
+				fmt.Printf("TopicPartition.Error: %v\n", e.TopicPartition.Error)
+				if e.TopicPartition.Metadata != nil {
+					fmt.Println("TopicPartition.Metadata:", e.TopicPartition.Metadata)
+				}
 				fmt.Println("-------------------------------------------")
 			case kafka.PartitionEOF:
 				fmt.Printf("Reached end of partition %v\n", e)
