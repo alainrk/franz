@@ -1,7 +1,8 @@
-# [WIP] Franz
+# Franz [WIP]
 
 ## Overview
-"Franz" is a Work In Progress command-line tool designed to facilitate the analysis of Kafka topics, perform scraping operations, and execute various tasks related to Kafka message processing. At the moment it includes simple functionalities such as starting a Kafka consumer, publishing random messages to topics, and cleaning up topics as needed.
+
+Franz is a Work In Progress command-line tool designed to facilitate the analysis of Kafka topics, perform scraping operations, and execute various tasks related to Kafka message processing. At the moment it includes simple functionalities such as starting a Kafka consumer, publishing random messages to topics, and cleaning up topics as needed.
 
 This tool is built using the Confluent Kafka library in Go and provides an interface for developers and administrators to interact with Kafka topics. With Franz, you will be able to analyze, produce, and manage messages in your Kafka clusters.
 
