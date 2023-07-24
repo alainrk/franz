@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
@@ -35,7 +36,12 @@ func main() {
 
 	for i := 1; i <= numMessages; i++ {
 		value := getRandomMessage()
-		err := publishMessage(p, topic, []byte(strconv.Itoa(i)), value)
+		headers := []kafka.Header{
+			{Key: "message_number", Value: []byte(strconv.Itoa(i))},
+			{Key: "timestamp", Value: []byte(time.Now().Format(time.RFC3339))},
+		}
+
+		err := publishMessage(p, topic, []byte(strconv.Itoa(i)), value, headers)
 		if err != nil {
 			fmt.Printf("Failed to publish message %d: %v\n", i, err)
 			break
@@ -47,13 +53,14 @@ func main() {
 	fmt.Println("All messages published!")
 }
 
-func publishMessage(p *kafka.Producer, topic string, key, value []byte) error {
+func publishMessage(p *kafka.Producer, topic string, key, value []byte, headers []kafka.Header) error {
 	deliveryChan := make(chan kafka.Event)
 
 	err := p.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Key:            key,
 		Value:          value,
+		Headers:        headers,
 	}, deliveryChan)
 
 	if err != nil {
