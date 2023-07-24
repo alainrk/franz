@@ -4,13 +4,32 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 var broker = "localhost:29092"
-var topics = []string{"topic1", "topic2"}
+
+// GetAvailableTopics returns a list of all available topics in the Kafka broker.
+// If excludeInternals is true, it will exclude internal topics (starting with _).
+func GetAvailableTopics(client *kafka.Consumer, excludeInternals bool) ([]string, error) {
+	metadata, err := client.GetMetadata(nil, true, 5000)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get metadata: %w", err)
+	}
+
+	var topics []string
+	for topic := range metadata.Topics {
+		if excludeInternals && strings.HasPrefix(topic, "_") {
+			continue
+		}
+		topics = append(topics, topic)
+	}
+
+	return topics, nil
+}
 
 func main() {
 	sigchan := make(chan os.Signal, 1)
@@ -26,6 +45,18 @@ func main() {
 		return
 	}
 	defer c.Close()
+
+	topics, err := GetAvailableTopics(c, true)
+	if err != nil {
+		fmt.Printf("Failed to get available topics: %v\n", err)
+		return
+	}
+
+	fmt.Println(topics)
+
+	if len(topics) >= 0 {
+		return
+	}
 
 	err = c.SubscribeTopics(topics, nil)
 	if err != nil {
