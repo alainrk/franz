@@ -19,6 +19,6 @@ Before running the Franz, ensure you have Docker and Docker Compose installed on
 - `make publish-random`: Provides instructions for publishing random messages to a topic.
 - `make cleanup-topics`: Displays a warning and instructions to clean up topics.
 
-## Usage
+## Usage
 
-TODO
+*TODO*
