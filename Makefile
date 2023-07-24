@@ -11,3 +11,9 @@ down:
 
 logs:
 	docker-compose logs -f
+
+run:
+	go run cmd/franz/main.go
+
+publish-random:
+	go run cmd/publisher/main.go topic1 10
