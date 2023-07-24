@@ -3,7 +3,7 @@
 **Work in progress**
 
 <div align="center">
-  <img src="./assets/franz.png" width="200" height="auto"/>
+  <img src="./assets/franz.png" width="300" height="auto"/>
 </div>
 
 ## Overview
