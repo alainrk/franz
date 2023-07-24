@@ -22,3 +22,10 @@ Before running the Franz, ensure you have Docker and Docker Compose installed on
 ## Usage
 
 *TODO*
+
+
+## TODO
+
+- Env handling
+- Coverage
+- Schema registry serde support
