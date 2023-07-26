@@ -12,9 +12,13 @@ import (
 
 var broker = "localhost:29092"
 
+type KafkaConsumer interface {
+	GetMetadata(topic *string, allTopics bool, timeoutMs int) (*kafka.Metadata, error)
+}
+
 // GetAvailableTopics returns a list of all available topics in the Kafka broker.
 // If excludeInternals is true, it will exclude internal topics (starting with _).
-func GetAvailableTopics(client *kafka.Consumer, excludeInternals bool) ([]string, error) {
+func GetAvailableTopics(client KafkaConsumer, excludeInternals bool) ([]string, error) {
 	metadata, err := client.GetMetadata(nil, true, 5000)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get metadata: %w", err)
