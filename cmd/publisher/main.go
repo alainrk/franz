@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/alainrk/franz/models"
+	"franz/models"
+
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 

@@ -2,38 +2,15 @@ package main
 
 import (
 	"fmt"
+	"franz/internal/admin"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 var broker = "localhost:29092"
-
-type KafkaConsumer interface {
-	GetMetadata(topic *string, allTopics bool, timeoutMs int) (*kafka.Metadata, error)
-}
-
-// GetAvailableTopics returns a list of all available topics in the Kafka broker.
-// If excludeInternals is true, it will exclude internal topics (starting with _).
-func GetAvailableTopics(client KafkaConsumer, excludeInternals bool) ([]string, error) {
-	metadata, err := client.GetMetadata(nil, true, 5000)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get metadata: %w", err)
-	}
-
-	var topics []string
-	for topic := range metadata.Topics {
-		if excludeInternals && strings.HasPrefix(topic, "_") {
-			continue
-		}
-		topics = append(topics, topic)
-	}
-
-	return topics, nil
-}
 
 func main() {
 	sigchan := make(chan os.Signal, 1)
@@ -50,7 +27,13 @@ func main() {
 	}
 	defer c.Close()
 
-	topics, err := GetAvailableTopics(c, true)
+	adminClient, err := admin.NewAdminClient(c)
+	if err != nil {
+		fmt.Printf("Failed to create admin client: %v\n", err)
+		return
+	}
+
+	topics, err := adminClient.GetTopics(false)
 	if err != nil {
 		fmt.Printf("Failed to get available topics: %v\n", err)
 		return

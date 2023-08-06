@@ -1,4 +1,4 @@
-module github.com/alainrk/franz
+module franz
 
 go 1.20
 
