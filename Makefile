@@ -26,3 +26,6 @@ cleanup-topics:
 
 proto-generate:
 	buf generate proto
+
+test:
+	go test -v -cover -race ./...
