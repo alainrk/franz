@@ -109,6 +109,8 @@ func main() {
 	if l != "" {
 		log.SetFormatter(&log.TextFormatter{})
 	}
+	// TODO: make log level configurable
+	log.SetLevel(log.DebugLevel)
 
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": broker,
