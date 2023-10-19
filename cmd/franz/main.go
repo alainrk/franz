@@ -9,13 +9,20 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	log "github.com/sirupsen/logrus"
+
+	"franz/internal/config"
 )
 
 var broker = "localhost:29092"
 
 func main() {
+	// Set up ctrl-c handler
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Load configuration
+	config, err := config.NewConfiguration()
+	fmt.Println("URLs:", config.KafkaBootstrapURLs)
 
 	log.SetFormatter(&log.JSONFormatter{})
 	l := os.Getenv("LOG_TEXT")
@@ -24,7 +31,7 @@ func main() {
 	}
 
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": broker,
+		"bootstrap.servers": config.KafkaBootstrapURLs,
 		"group.id":          "franz",
 		"auto.offset.reset": "earliest",
 	})
