@@ -13,7 +13,7 @@ logs:
 	docker-compose logs -f
 
 run:
-	LOG_TEXT=true go run cmd/franz/main.go
+	LOG_TEXT=true FRANZ_DEBUG=true go run cmd/franz/main.go
 
 publish-random:
 	@echo "Run:\n\tgo run cmd/publisher/main.go topic_name number_of_messages\n"

@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"franz/internal/admin"
+	"franz/internal/config"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	log "github.com/sirupsen/logrus"
 
-	"franz/internal/config"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 var broker = "localhost:29092"
@@ -29,11 +29,16 @@ func main() {
 	if l != "" {
 		log.SetFormatter(&log.TextFormatter{})
 	}
+	if config.Debug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": config.KafkaBootstrapURLs,
-		"group.id":          "franz",
-		"auto.offset.reset": "earliest",
+		"bootstrap.servers":               config.KafkaBootstrapURLs,
+		"group.id":                        config.KafkaConsumerGroup,
+		"go.application.rebalance.enable": true,
+		"session.timeout.ms":              6000,
+		"default.topic.config":            kafka.ConfigMap{"auto.offset.reset": "earliest"},
 	})
 	if err != nil {
 		log.Errorf("Failed to create consumer: %v", err)
@@ -68,16 +73,13 @@ func main() {
 		select {
 		case sig := <-sigchan:
 			log.Infof("Caught signal %v: terminating", sig)
+			c.Close()
 			run = false
 		default:
 			ev := c.Poll(100)
-			if ev == nil {
-				continue
-			}
-
 			switch e := ev.(type) {
 			case *kafka.Message:
-				log.Debugf("Received a new message from topic %s", *e.TopicPartition.Topic)
+				log.Infof("Received a new message from topic %s", *e.TopicPartition.Topic)
 
 				s := fmt.Sprintf("Headers: %v", e.Headers)
 				s += fmt.Sprintf("Content: %s", e.Value)
@@ -90,13 +92,18 @@ func main() {
 				if e.TopicPartition.Metadata != nil {
 					s += fmt.Sprintf("TopicPartition.Metadata: %v", e.TopicPartition.Metadata)
 				}
-
-				log.Debugf(s)
+				log.Infof(s)
 
 			case kafka.PartitionEOF:
-				log.Debugf("Reached end of partition %v", e)
+				fmt.Printf("%% Reached %v\n", e)
 			case kafka.Error:
-				log.Errorf("Error: %v", e)
+				fmt.Fprintf(os.Stderr, "%% Kafka Error on consume: %v\n", e)
+				run = false
+			default:
+				if e != nil {
+					fmt.Printf("Ignored %v\n", e)
+				}
+				continue
 			}
 		}
 	}
