@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"franz/internal/admin"
 	"franz/internal/config"
+	"franz/internal/handlers"
 	"os"
 	"os/signal"
 	"syscall"
@@ -24,6 +25,7 @@ func main() {
 	config, err := config.NewConfiguration()
 	fmt.Println("URLs:", config.KafkaBootstrapURLs)
 
+	// Setup global logger
 	log.SetFormatter(&log.JSONFormatter{})
 	l := os.Getenv("LOG_TEXT")
 	if l != "" {
@@ -33,6 +35,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
+	// Create a new consumer
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers":               config.KafkaBootstrapURLs,
 		"group.id":                        config.KafkaConsumerGroup,
@@ -46,12 +49,14 @@ func main() {
 	}
 	defer c.Close()
 
+	// Create a new kafka admin client
 	adminClient, err := admin.NewAdminClient(c)
 	if err != nil {
 		log.Errorf("Failed to create admin client: %v", err)
 		return
 	}
 
+	// Retrieve all topics, excluding internal ones
 	topics, err := adminClient.GetTopics(false)
 	if err != nil {
 		log.Errorf("Failed to get available topics: %v", err)
@@ -60,11 +65,15 @@ func main() {
 
 	log.Infof("Auto-discovered topics: %v", topics)
 
+	// Subscribe all non-internal topics
 	err = c.SubscribeTopics(topics, nil)
 	if err != nil {
 		log.Errorf("Failed to subscribe to topics: %v", err)
 		return
 	}
+
+	// Create a new handler
+	handler := handlers.NewDefaultHandler()
 
 	log.Info("Consumer started. Press Ctrl+C to exit.")
 
@@ -79,21 +88,10 @@ func main() {
 			ev := c.Poll(100)
 			switch e := ev.(type) {
 			case *kafka.Message:
-				log.Infof("Received a new message from topic %s", *e.TopicPartition.Topic)
-
-				s := fmt.Sprintf("Headers: %v", e.Headers)
-				s += fmt.Sprintf("Content: %s", e.Value)
-				s += fmt.Sprintf("Key: %s", e.Key)
-				s += fmt.Sprintf("Opaque: %v", e.Opaque)
-				s += fmt.Sprintf("TopicPartition.Topic: %s", *e.TopicPartition.Topic)
-				s += fmt.Sprintf("TopicPartition.Partition: %d", e.TopicPartition.Partition)
-				s += fmt.Sprintf("TopicPartition.Offset: %v", e.TopicPartition.Offset)
-				s += fmt.Sprintf("TopicPartition.Error: %v", e.TopicPartition.Error)
-				if e.TopicPartition.Metadata != nil {
-					s += fmt.Sprintf("TopicPartition.Metadata: %v", e.TopicPartition.Metadata)
+				err := handler.HandleMessage(e)
+				if err != nil {
+					log.Errorf("Failed to handle message: %v", err)
 				}
-				log.Infof(s)
-
 			case kafka.PartitionEOF:
 				fmt.Printf("%% Reached %v\n", e)
 			case kafka.Error:
