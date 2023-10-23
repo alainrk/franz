@@ -11,6 +11,12 @@ on:
 
 jobs:
 
+  branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        run: echo ${{ github.ref }}
+
   build:
     runs-on: ubuntu-latest
     steps:
